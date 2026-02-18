@@ -35,14 +35,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     public void update(User user) {
         User existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + user.getId()));
 
-        existingUser.setUsername(user.getUsername());
-        existingUser.setEmail(user.getEmail());
+        existingUser.setFirstName(user.getFirstName());
+        existingUser.setLastName(user.getLastName());
         existingUser.setAge(user.getAge());
+        existingUser.setEmail(user.getEmail());
 
-        // Обновляем пароль только если он был изменен
-        if (!user.getPassword().isEmpty() && !user.getPassword().equals(existingUser.getPassword())) {
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByEmail(username);
     }
 
     @Override
@@ -77,9 +77,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByEmail(username);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found: " + username);
+            throw new UsernameNotFoundException("User not found with email: " + username);
         }
         return user;
     }

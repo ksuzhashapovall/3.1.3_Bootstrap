@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -8,8 +9,10 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
-import javax.annotation.PostConstruct;
-import java.util.*;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class RoleServiceImpl implements RoleService {
@@ -47,15 +50,16 @@ public class RoleServiceImpl implements RoleService {
         Role userRole = roleRepository.findByName("ROLE_USER");
         Role adminRole = roleRepository.findByName("ROLE_ADMIN");
 
-        if (userRepository.findByUsername("admin") == null) {
-            User admin = new User("admin", passwordEncoder.encode("admin"), "admin@mail.ru", 30);
+        // Создаем админа
+        if (userRepository.findByEmail("admin@mail.ru") == null) {
+            User admin = new User("admin", "admin", 35, "admin@mail.ru", passwordEncoder.encode("admin"));
             Set<Role> adminRoles = new HashSet<>();
             adminRoles.add(adminRole);
             adminRoles.add(userRole);
             admin.setRoles(adminRoles);
             userRepository.save(admin);
         } else {
-            User admin = userRepository.findByUsername("admin");
+            User admin = userRepository.findByEmail("admin@mail.ru");
             boolean needUpdate = false;
 
             if (!admin.getRoles().contains(adminRole)) {
@@ -72,14 +76,15 @@ public class RoleServiceImpl implements RoleService {
             }
         }
 
-        if (userRepository.findByUsername("user") == null) {
-            User user = new User("user", passwordEncoder.encode("user"), "user@mail.ru", 25);
+        // Создаем обычного пользователя
+        if (userRepository.findByEmail("user@mail.ru") == null) {
+            User user = new User("user", "user", 30, "user@mail.ru", passwordEncoder.encode("user"));
             Set<Role> userRoles = new HashSet<>();
             userRoles.add(userRole);
             user.setRoles(userRoles);
             userRepository.save(user);
         } else {
-            User user = userRepository.findByUsername("user");
+            User user = userRepository.findByEmail("user@mail.ru");
             if (!user.getRoles().contains(userRole)) {
                 user.getRoles().add(userRole);
                 userRepository.save(user);

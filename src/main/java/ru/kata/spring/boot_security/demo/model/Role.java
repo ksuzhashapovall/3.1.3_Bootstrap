@@ -1,8 +1,8 @@
 package ru.kata.spring.boot_security.demo.model;
 
+import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 
-import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
@@ -27,7 +27,6 @@ public class Role implements GrantedAuthority {
         return name;
     }
 
-    // Геттеры и сеттеры
     public Long getId() {
         return id;
     }
