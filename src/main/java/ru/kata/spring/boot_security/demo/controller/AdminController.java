@@ -5,10 +5,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.dto.UserDto;
+import ru.kata.spring.boot_security.demo.mapper.UserMapper;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
@@ -24,65 +23,51 @@ public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Autowired
-    public AdminController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
+    public AdminController(UserService userService, RoleService roleService,
+                           PasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userService = userService;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     @GetMapping
     public String adminPanel(Model model) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userService.findByUsername(username);
-
-        if (currentUser == null) {
-            currentUser = userService.getAll().stream().findFirst().orElse(null);
-        }
-
         model.addAttribute("user", currentUser);
-        model.addAttribute("newUser", new User());
+        model.addAttribute("newUser", new UserDto());
         model.addAttribute("users", userService.getAll());
-        model.addAttribute("userToEdit", new User());
         model.addAttribute("allRoles", roleService.getAll());
         return "admin";
     }
 
-    @GetMapping("/add")
-    public String showAddForm(Model model) {
-        model.addAttribute("newUser", new User());
-        model.addAttribute("allRoles", roleService.getAll());
-        return "add-new-user";
-    }
-
     @PostMapping("/add")
-    public String addUser(@RequestParam String firstName,
-                          @RequestParam String lastName,
-                          @RequestParam int age,
-                          @RequestParam String email,
-                          @RequestParam String password,
-                          @RequestParam(required = false) String[] roles) {
+    public String addUser(@ModelAttribute("newUser") UserDto userDto,
+                          @RequestParam(required = false) Long[] roleIds) {
 
-        User user = new User(firstName, lastName, age, email, passwordEncoder.encode(password));
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
         Set<Role> roleSet = new HashSet<>();
-        if (roles != null) {
-            for (String roleName : roles) {
-                roleSet.add(roleService.findByName(roleName));
+        if (roleIds != null) {
+            for (Long roleId : roleIds) {
+                roleService.getById(roleId).ifPresent(roleSet::add);
             }
-        } else {
-            roleSet.add(roleService.findByName("ROLE_USER"));
         }
-        user.setRoles(roleSet);
+        userDto.setRoles(roleSet);
 
+        User user = userMapper.toEntity(userDto);
         userService.add(user);
         return "redirect:/admin";
     }
 
     @GetMapping("/edit")
     public String showEditForm(@RequestParam("id") Long id, Model model) {
-        model.addAttribute("user", userService.getById(id));
+        User user = userService.getById(id);
+        model.addAttribute("user", user);
         model.addAttribute("allRoles", roleService.getAll());
         return "edit-user";
     }
@@ -90,26 +75,27 @@ public class AdminController {
     @PostMapping("/update")
     public String updateUser(@RequestParam Long id,
                              @RequestParam String firstName,
-                             @RequestParam String lastName,
+                             @RequestParam(required = false) String lastName,
                              @RequestParam int age,
                              @RequestParam String email,
                              @RequestParam(required = false) String password,
-                             @RequestParam(required = false) String[] roles) {
+                             @RequestParam(required = false) Long[] roleIds) {
 
         User user = userService.getById(id);
         user.setFirstName(firstName);
-        user.setLastName(lastName);
+        if (lastName != null) user.setLastName(lastName);
         user.setAge(age);
         user.setEmail(email);
+        user.setUsername(email);
 
         if (password != null && !password.isEmpty()) {
             user.setPassword(passwordEncoder.encode(password));
         }
 
         Set<Role> roleSet = new HashSet<>();
-        if (roles != null) {
-            for (String roleName : roles) {
-                roleSet.add(roleService.findByName(roleName));
+        if (roleIds != null) {
+            for (Long roleId : roleIds) {
+                roleService.getById(roleId).ifPresent(roleSet::add);
             }
         }
         user.setRoles(roleSet);

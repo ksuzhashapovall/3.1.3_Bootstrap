@@ -45,41 +45,36 @@
                     <h2 class="mb-4 text-center">Edit user</h2>
 
                     <div class="border p-4 rounded bg-light">
-                        <form th:action="@{/admin/update}" th:object="${user}" method="post">
+                        <form th:action="@{/admin/update}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                             <input type="hidden" name="id" th:value="${user.id}">
 
                             <div class="mb-3">
                                 <label class="form-label">First name</label>
-                                <input type="text" class="form-control" th:field="*{firstName}" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Last name</label>
-                                <input type="text" class="form-control" th:field="*{lastName}" required>
+                                <input type="text" class="form-control" name="firstName" th:value="${user.firstName}" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Age</label>
-                                <input type="number" class="form-control" th:field="*{age}" required>
+                                <input type="number" class="form-control" name="age" th:value="${user.age}" required>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" th:field="*{email}" required>
+                                <input type="email" class="form-control" name="email" th:value="${user.email}" required>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" class="form-control" th:field="*{password}"
+                                <label class="form-label">New Password</label>
+                                <input type="password" class="form-control" name="password"
                                        placeholder="Leave blank to keep current">
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">Role</label>
-                                <select class="form-select" name="roles" multiple size="2">
+                                <select class="form-select" name="roleIds" multiple size="2">
                                     <option th:each="role : ${allRoles}"
-                                            th:value="${role.name}"
+                                            th:value="${role.id}"
                                             th:text="${role.name.replace('ROLE_','')}"
                                             th:selected="${user.roles.contains(role)}"></option>
                                 </select>
@@ -87,8 +82,8 @@
                             </div>
 
                             <div class="text-end">
-                                <button type="submit" class="btn btn-primary">Edit</button>
-                                <a href="/admin" class="btn btn-secondary">Close</a>
+                                <button type="submit" class="btn btn-primary">Update</button>
+                                <a href="/admin" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>

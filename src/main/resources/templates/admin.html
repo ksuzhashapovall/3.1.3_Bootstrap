@@ -64,7 +64,6 @@
             <tr>
               <th>ID</th>
               <th>First Name</th>
-              <th>Last Name</th>
               <th>Age</th>
               <th>Email</th>
               <th>Role</th>
@@ -76,7 +75,6 @@
             <tr th:each="user : ${users}">
               <td th:text="${user.id}"></td>
               <td th:text="${user.firstName}"></td>
-              <td th:text="${user.lastName}"></td>
               <td th:text="${user.age}"></td>
               <td th:text="${user.username}"></td>
               <td th:text="${user.getRolesToString()}"></td>
@@ -91,7 +89,6 @@
                         data-bs-target="#deleteModal"
                         th:data-id="${user.id}"
                         th:data-firstname="${user.firstName}"
-                        th:data-lastname="${user.lastName}"
                         th:data-age="${user.age}"
                         th:data-email="${user.username}"
                         th:data-role="${user.getRolesToString()}">
@@ -115,31 +112,32 @@
                   <label class="form-label">First name</label>
                   <input type="text" class="form-control" th:field="*{firstName}" required>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Last name</label>
-                  <input type="text" class="form-control" th:field="*{lastName}" required>
-                </div>
+
                 <div class="mb-3">
                   <label class="form-label">Age</label>
                   <input type="number" class="form-control" th:field="*{age}" required>
                 </div>
+
                 <div class="mb-3">
                   <label class="form-label">Email</label>
                   <input type="email" class="form-control" th:field="*{email}" required>
                 </div>
+
                 <div class="mb-3">
                   <label class="form-label">Password</label>
                   <input type="password" class="form-control" th:field="*{password}" required>
                 </div>
+
                 <div class="mb-3">
                   <label class="form-label">Role</label>
-                  <select class="form-select" name="roles" multiple size="2">
+                  <select class="form-select" name="roleIds" multiple size="2">
                     <option th:each="role : ${allRoles}"
-                            th:value="${role.name}"
+                            th:value="${role.id}"
                             th:text="${role.name.replace('ROLE_','')}"></option>
                   </select>
                   <small class="text-muted">Hold Ctrl to select multiple</small>
                 </div>
+
                 <div class="text-end">
                   <button type="submit" class="btn btn-primary">Add new user</button>
                   <a href="/admin" class="btn btn-secondary">Close</a>
@@ -153,7 +151,7 @@
   </div>
 </div>
 
-<!-- Модальное окно для удаления (в стиле Edit, но только для чтения) -->
+<!-- Модальное окно для удаления -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -164,16 +162,10 @@
       <div class="modal-body">
         <p class="mb-3">Are you sure you want to delete this user?</p>
 
-        <!-- Информация о пользователе в стиле Edit (только для чтения) -->
         <div class="border p-4 rounded bg-light">
           <div class="mb-3">
             <label class="form-label fw-bold">First name</label>
             <div class="form-control bg-white" id="deleteUserFirstName" style="background-color: #fff; cursor: default;"></div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">Last name</label>
-            <div class="form-control bg-white" id="deleteUserLastName" style="background-color: #fff; cursor: default;"></div>
           </div>
 
           <div class="mb-3">
@@ -205,9 +197,8 @@
 
 <!-- JavaScript для модального окна -->
 <script th:inline="javascript">
-  function fillDeleteModal(id, firstName, lastName, age, email, role) {
+  function fillDeleteModal(id, firstName, age, email, role) {
     document.getElementById('deleteUserFirstName').textContent = firstName;
-    document.getElementById('deleteUserLastName').textContent = lastName || '-';
     document.getElementById('deleteUserAge').textContent = age;
     document.getElementById('deleteUserEmail').textContent = email;
     document.getElementById('deleteUserRole').textContent = role;
@@ -222,12 +213,11 @@
       button.addEventListener('click', function() {
         const id = this.getAttribute('data-id');
         const firstName = this.getAttribute('data-firstname');
-        const lastName = this.getAttribute('data-lastname');
         const age = this.getAttribute('data-age');
         const email = this.getAttribute('data-email');
         const role = this.getAttribute('data-role');
 
-        fillDeleteModal(id, firstName, lastName, age, email, role);
+        fillDeleteModal(id, firstName, age, email, role);
       });
     });
   });

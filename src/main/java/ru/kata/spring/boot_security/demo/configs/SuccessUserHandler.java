@@ -13,8 +13,6 @@ import java.util.Set;
 
 @Component
 public class SuccessUserHandler implements AuthenticationSuccessHandler {
-    private static final String USER = "USER";
-    private static final String ADMIN = "ADMIN";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -28,10 +26,10 @@ public class SuccessUserHandler implements AuthenticationSuccessHandler {
         Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities());
         System.out.println("Roles: " + roles);
 
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ADMIN")) {
+        if (roles.contains("ROLE_ADMIN")) {
             System.out.println("Redirecting to /admin");
             response.sendRedirect("/admin");
-        } else if (roles.contains("ROLE_USER") || roles.contains("USER")) {
+        } else if (roles.contains("ROLE_USER")) {
             System.out.println("Redirecting to /user");
             response.sendRedirect("/user");
         } else {

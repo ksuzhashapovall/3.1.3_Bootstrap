@@ -27,7 +27,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void add(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -41,9 +40,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         existingUser.setLastName(user.getLastName());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
+        existingUser.setUsername(user.getEmail());
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            if (!user.getPassword().startsWith("$2a$")) {
+                existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+            } else {
+                existingUser.setPassword(user.getPassword());
+            }
         }
 
         existingUser.setRoles(user.getRoles());
@@ -65,7 +69,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public User findByUsername(String username) {
-        return userRepository.findByEmail(username);
+        User user = userRepository.findByEmail(username);
+        if (user == null) {
+            user = userRepository.findByUsername(username);
+        }
+        return user;
     }
 
     @Override
@@ -77,10 +85,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("=== Loading user: " + username + " ===");
+
         User user = userRepository.findByEmail(username);
         if (user == null) {
-            throw new UsernameNotFoundException("User not found with email: " + username);
+            user = userRepository.findByUsername(username);
         }
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with username/email: " + username);
+        }
+
+        user.getRoles().size();
+
+        System.out.println("User found: " + user.getEmail());
+        System.out.println("Roles: " + user.getRoles());
+
         return user;
     }
 }
