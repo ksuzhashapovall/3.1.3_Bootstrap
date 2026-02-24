@@ -17,7 +17,7 @@
   <!-- Верхняя панель с пользователем -->
   <div class="row bg-dark text-white py-2">
     <div class="col-3">
-      <span th:text="${user.username} + ' with roles: ' + ${user.getRolesToString()}"></span>
+      <span th:text="${user.email} + ' with roles: ' + ${user.getRolesToString()}"></span>
     </div>
     <div class="col-7"></div>
     <div class="col-2 text-end">
@@ -64,6 +64,7 @@
             <tr>
               <th>ID</th>
               <th>First Name</th>
+              <th>Last Name</th>
               <th>Age</th>
               <th>Email</th>
               <th>Role</th>
@@ -75,8 +76,9 @@
             <tr th:each="user : ${users}">
               <td th:text="${user.id}"></td>
               <td th:text="${user.firstName}"></td>
+              <td th:text="${user.lastName}"></td>
               <td th:text="${user.age}"></td>
-              <td th:text="${user.username}"></td>
+              <td th:text="${user.email}"></td>
               <td th:text="${user.getRolesToString()}"></td>
               <td>
                 <a th:href="@{/admin/edit(id=${user.id})}"
@@ -89,8 +91,9 @@
                         data-bs-target="#deleteModal"
                         th:data-id="${user.id}"
                         th:data-firstname="${user.firstName}"
+                        th:data-lastname="${user.lastName}"
                         th:data-age="${user.age}"
-                        th:data-email="${user.username}"
+                        th:data-email="${user.email}"
                         th:data-role="${user.getRolesToString()}">
                   Delete
                 </button>
@@ -109,8 +112,13 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                 <div class="mb-3">
-                  <label class="form-label">First name</label>
+                  <label class="form-label">First Name</label>
                   <input type="text" class="form-control" th:field="*{firstName}" required>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" class="form-control" th:field="*{lastName}">
                 </div>
 
                 <div class="mb-3">
@@ -164,20 +172,21 @@
 
         <div class="border p-4 rounded bg-light">
           <div class="mb-3">
-            <label class="form-label fw-bold">First name</label>
+            <label class="form-label fw-bold">First Name</label>
             <div class="form-control bg-white" id="deleteUserFirstName" style="background-color: #fff; cursor: default;"></div>
           </div>
-
+          <div class="mb-3">
+            <label class="form-label fw-bold">Last Name</label>
+            <div class="form-control bg-white" id="deleteUserLastName" style="background-color: #fff; cursor: default;"></div>
+          </div>
           <div class="mb-3">
             <label class="form-label fw-bold">Age</label>
             <div class="form-control bg-white" id="deleteUserAge" style="background-color: #fff; cursor: default;"></div>
           </div>
-
           <div class="mb-3">
             <label class="form-label fw-bold">Email</label>
             <div class="form-control bg-white" id="deleteUserEmail" style="background-color: #fff; cursor: default;"></div>
           </div>
-
           <div class="mb-3">
             <label class="form-label fw-bold">Role</label>
             <div class="form-control bg-white" id="deleteUserRole" style="background-color: #fff; cursor: default;"></div>
@@ -197,8 +206,9 @@
 
 <!-- JavaScript для модального окна -->
 <script th:inline="javascript">
-  function fillDeleteModal(id, firstName, age, email, role) {
+  function fillDeleteModal(id, firstName, lastName, age, email, role) {
     document.getElementById('deleteUserFirstName').textContent = firstName;
+    document.getElementById('deleteUserLastName').textContent = lastName || '-';
     document.getElementById('deleteUserAge').textContent = age;
     document.getElementById('deleteUserEmail').textContent = email;
     document.getElementById('deleteUserRole').textContent = role;
@@ -213,11 +223,12 @@
       button.addEventListener('click', function() {
         const id = this.getAttribute('data-id');
         const firstName = this.getAttribute('data-firstname');
+        const lastName = this.getAttribute('data-lastname');
         const age = this.getAttribute('data-age');
         const email = this.getAttribute('data-email');
         const role = this.getAttribute('data-role');
 
-        fillDeleteModal(id, firstName, age, email, role);
+        fillDeleteModal(id, firstName, lastName, age, email, role);
       });
     });
   });

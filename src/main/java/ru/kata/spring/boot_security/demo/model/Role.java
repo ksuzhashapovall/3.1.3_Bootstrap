@@ -10,7 +10,7 @@ import java.util.Set;
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
 
-    private static final long serialVersionUID = 1L; // Добавьте это
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

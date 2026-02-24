@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         existingUser.setLastName(user.getLastName());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
-        existingUser.setUsername(user.getEmail());
+        existingUser.setUsername(user.getUsername());
 
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             if (!user.getPassword().startsWith("$2a$")) {
@@ -99,6 +99,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.getRoles().size();
 
         System.out.println("User found: " + user.getEmail());
+        System.out.println("Username: " + user.getUsername());
         System.out.println("Roles: " + user.getRoles());
 
         return user;

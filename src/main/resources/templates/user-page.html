@@ -13,7 +13,7 @@
   <!-- Шапка с пользователем -->
   <div class="row bg-dark text-white py-2">
     <div class="col-3">
-      <span th:text="${user.username} + ' with roles: ' + ${user.getRolesToString()}"></span>
+      <span th:text="${user.email} + ' with roles: ' + ${user.getRolesToString()}"></span>
     </div>
     <div class="col-7"></div>
     <div class="col-2 text-end">
@@ -44,6 +44,7 @@
           <tr>
             <th>ID</th>
             <th>First Name</th>
+            <th>Last Name</th>
             <th>Age</th>
             <th>Email</th>
             <th>Role</th>
@@ -53,8 +54,9 @@
           <tr>
             <td th:text="${user.id}"></td>
             <td th:text="${user.firstName}"></td>
+            <td th:text="${user.lastName}"></td>
             <td th:text="${user.age}"></td>
-            <td th:text="${user.username}"></td>
+            <td th:text="${user.email}"></td>
             <td th:text="${user.getRolesToString()}"></td>
           </tr>
           </tbody>

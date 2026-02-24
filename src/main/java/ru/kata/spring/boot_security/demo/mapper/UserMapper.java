@@ -16,7 +16,7 @@ public class UserMapper {
         user.setLastName(dto.getLastName());
         user.setAge(dto.getAge());
         user.setEmail(dto.getEmail());
-        user.setUsername(dto.getEmail());
+        user.setUsername(dto.getEmail()); // username всегда равен email
         user.setPassword(dto.getPassword());
         user.setRoles(dto.getRoles());
 

@@ -56,11 +56,17 @@ public class AdminController {
             for (Long roleId : roleIds) {
                 roleService.getById(roleId).ifPresent(roleSet::add);
             }
+        } else {
+            Role userRole = roleService.findByName("ROLE_USER");
+            if (userRole != null) {
+                roleSet.add(userRole);
+            }
         }
         userDto.setRoles(roleSet);
 
         User user = userMapper.toEntity(userDto);
         userService.add(user);
+
         return "redirect:/admin";
     }
 
@@ -75,21 +81,22 @@ public class AdminController {
     @PostMapping("/update")
     public String updateUser(@RequestParam Long id,
                              @RequestParam String firstName,
-                             @RequestParam(required = false) String lastName,
+                             @RequestParam String lastName,
                              @RequestParam int age,
                              @RequestParam String email,
-                             @RequestParam(required = false) String password,
+                             @RequestParam(required = false) String newPassword,
                              @RequestParam(required = false) Long[] roleIds) {
 
         User user = userService.getById(id);
         user.setFirstName(firstName);
-        if (lastName != null) user.setLastName(lastName);
+        user.setLastName(lastName);
         user.setAge(age);
         user.setEmail(email);
-        user.setUsername(email);
+        user.setUsername(email); // username всегда равен email
 
-        if (password != null && !password.isEmpty()) {
-            user.setPassword(passwordEncoder.encode(password));
+        // Обновляем пароль только если введен новый
+        if (newPassword != null && !newPassword.isEmpty()) {
+            user.setPassword(passwordEncoder.encode(newPassword));
         }
 
         Set<Role> roleSet = new HashSet<>();
