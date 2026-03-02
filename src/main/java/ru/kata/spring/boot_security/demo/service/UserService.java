@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface UserService {
     void add(User user);
-    void update(User user);
+    void update(User user, String newPassword, Long[] roleIds);
     void delete(Long id);
     User getById(Long id);
     User findByUsername(String username);

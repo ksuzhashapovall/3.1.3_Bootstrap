@@ -7,32 +7,42 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
+    private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository,
+                           RoleService roleService,
+                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
     public void add(User user) {
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         userRepository.save(user);
     }
 
     @Override
     @Transactional
-    public void update(User user) {
+    public void update(User user, String newPassword, Long[] roleIds) {
         User existingUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + user.getId()));
 
@@ -40,17 +50,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         existingUser.setLastName(user.getLastName());
         existingUser.setAge(user.getAge());
         existingUser.setEmail(user.getEmail());
-        existingUser.setUsername(user.getUsername());
+        existingUser.setUsername(user.getEmail());
 
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            if (!user.getPassword().startsWith("$2a$")) {
-                existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            } else {
-                existingUser.setPassword(user.getPassword());
-            }
+        if (newPassword != null && !newPassword.isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(newPassword));
         }
 
-        existingUser.setRoles(user.getRoles());
+        Set<Role> roleSet = new HashSet<>();
+        if (roleIds != null) {
+            for (Long roleId : roleIds) {
+                roleService.getById(roleId).ifPresent(roleSet::add);
+            }
+        }
+        existingUser.setRoles(roleSet);
+
         userRepository.save(existingUser);
     }
 

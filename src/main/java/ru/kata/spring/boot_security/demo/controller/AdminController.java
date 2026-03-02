@@ -49,8 +49,6 @@ public class AdminController {
     public String addUser(@ModelAttribute("newUser") UserDto userDto,
                           @RequestParam(required = false) Long[] roleIds) {
 
-        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-
         Set<Role> roleSet = new HashSet<>();
         if (roleIds != null) {
             for (Long roleId : roleIds) {
@@ -92,22 +90,10 @@ public class AdminController {
         user.setLastName(lastName);
         user.setAge(age);
         user.setEmail(email);
-        user.setUsername(email); // username всегда равен email
+        user.setUsername(email);
 
-        // Обновляем пароль только если введен новый
-        if (newPassword != null && !newPassword.isEmpty()) {
-            user.setPassword(passwordEncoder.encode(newPassword));
-        }
+        userService.update(user, newPassword, roleIds);
 
-        Set<Role> roleSet = new HashSet<>();
-        if (roleIds != null) {
-            for (Long roleId : roleIds) {
-                roleService.getById(roleId).ifPresent(roleSet::add);
-            }
-        }
-        user.setRoles(roleSet);
-
-        userService.update(user);
         return "redirect:/admin";
     }
 
